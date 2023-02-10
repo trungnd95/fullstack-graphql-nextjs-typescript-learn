@@ -1,11 +1,16 @@
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import 'reflect-metadata';
+import { buildSchema } from 'type-graphql';
 import { DataSource } from "typeorm";
 import { Post } from './entities/Post';
 import { User } from './entities/User';
+import { HelloResolver } from './resolvers/Hello';
 require("dotenv").config();
 
 const main = async () => {
+  // Init data source to connect to database
   const appDataSource = new DataSource({
     type: "postgres",
     host: "localhost",
@@ -24,7 +29,21 @@ const main = async () => {
       .then(() => { console.log("Connected to database")})
       .catch((err) => { console.log("Failed to connect to database ", err)});
   
+  // Init graphql-server
+  const apolloServer = new ApolloServer({
+    schema: await buildSchema({
+      resolvers: [HelloResolver], 
+      validate: false
+    }), 
+    context: async ({ req }) => ({ token: req.headers.token}),
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()]
+  });
+
+  await apolloServer.start();
+  
+  // Init express server    
   const app = express();
+  apolloServer.applyMiddleware({app, cors: false});
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => { console.log("Server is running!")});
 }
