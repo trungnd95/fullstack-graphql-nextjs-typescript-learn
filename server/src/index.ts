@@ -1,7 +1,9 @@
-require("dotenv").config();
 import express from 'express';
 import 'reflect-metadata';
 import { DataSource } from "typeorm";
+import { Post } from './entities/Post';
+import { User } from './entities/User';
+require("dotenv").config();
 
 const main = async () => {
   const appDataSource = new DataSource({
@@ -13,7 +15,7 @@ const main = async () => {
     database: "reddit",
     synchronize: true,
     logging: true,
-    entities: [],
+    entities: [User, Post],
     subscribers: [],
     migrations: [],
   })
