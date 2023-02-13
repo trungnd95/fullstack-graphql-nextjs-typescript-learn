@@ -14,7 +14,8 @@ type FieldError {
 }
 
 type Mutation {
-  register(registerInput: UserRegisterInput!): UserRegisterResponse
+  login(loginInput: UserLoginInput!): UserMutationResponse!
+  register(registerInput: UserRegisterInput!): UserMutationResponse
 }
 
 interface MutationResponse {
@@ -36,16 +37,21 @@ type User {
   username: String!
 }
 
-input UserRegisterInput {
-  email: String!
+input UserLoginInput {
   password: String!
   username: String!
 }
 
-type UserRegisterResponse implements MutationResponse {
+type UserMutationResponse implements MutationResponse {
   code: Float!
   errors: [FieldError!]
   message: String
   success: Boolean!
   user: User
+}
+
+input UserRegisterInput {
+  email: String!
+  password: String!
+  username: String!
 }

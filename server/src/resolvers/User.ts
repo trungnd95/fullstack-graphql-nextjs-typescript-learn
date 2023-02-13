@@ -2,13 +2,14 @@ import bcrypt from "bcrypt";
 import { Arg, Mutation, Resolver } from "type-graphql";
 import { User } from '../entities/User';
 import { UserRegisterInput } from '../types/UserRegisterInput';
-import { UserRegisterResponse } from '../types/UserRegisterResponse';
+import { UserMutationResponse } from './../types/UseMutationResponse';
+import { UserLoginInput } from './../types/UserLoginInput';
 
 @Resolver()
 export class UserResolver {
-  @Mutation(() => UserRegisterResponse, { nullable: true })
+  @Mutation(() => UserMutationResponse, { nullable: true })
   async register(@Arg("registerInput") registerInput: UserRegisterInput) 
-  : Promise<UserRegisterResponse> {
+  : Promise<UserMutationResponse> {
     try {
 
       const { email, username, password } = registerInput;
@@ -51,5 +52,29 @@ export class UserResolver {
       }  
     }
 
+  }
+
+  @Mutation(() => UserMutationResponse) 
+  async login(@Arg("loginInput") loginInput: UserLoginInput) 
+    : Promise<UserMutationResponse> {
+    const { username, password } = loginInput;
+    const userExist = await User.findOneBy({ username });
+
+    if (userExist) {
+      const match = await bcrypt.compare(password, userExist.password);
+      if (match) 
+        return {
+          code: 200, 
+          success: true, 
+          user: userExist, 
+          message: "Login successful"
+        } 
+    }
+    
+    return {
+      code: 400, 
+      success: false, 
+      message: "Wrong email or password"
+    }
   }
 }

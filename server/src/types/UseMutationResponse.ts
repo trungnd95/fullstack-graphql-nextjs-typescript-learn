@@ -1,10 +1,10 @@
 import { Field, ObjectType } from "type-graphql";
-import { User } from './../entities/User';
+import { User } from '../entities/User';
 import { FieldError, MutationResponse } from "./MutationResponse";
 
 
 @ObjectType({implements: MutationResponse})
-export class UserRegisterResponse implements MutationResponse {
+export class UserMutationResponse implements MutationResponse {
   code: number;
   success: boolean;
   message?: string;
