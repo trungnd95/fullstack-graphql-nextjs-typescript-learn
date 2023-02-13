@@ -7,6 +7,7 @@ import { DataSource } from "typeorm";
 import { Post } from './entities/Post';
 import { User } from './entities/User';
 import { HelloResolver } from './resolvers/Hello';
+import { UserResolver } from './resolvers/User';
 require("dotenv").config();
 
 const main = async () => {
@@ -32,7 +33,8 @@ const main = async () => {
   // Init graphql-server
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver], 
+      resolvers: [HelloResolver, UserResolver], 
+      emitSchemaFile: true,
       validate: false
     }), 
     context: async ({ req }) => ({ token: req.headers.token}),
