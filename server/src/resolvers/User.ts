@@ -1,14 +1,18 @@
 import bcrypt from "bcrypt";
-import { Arg, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import { User } from '../entities/User';
-import { UserRegisterInput } from '../types/UserRegisterInput';
+import { Context } from "../types/Context";
+import { UserRegisterInput } from "../types/UserRegisterInput";
+import { COOKIE_NAME } from './../constants';
 import { UserMutationResponse } from './../types/UseMutationResponse';
 import { UserLoginInput } from './../types/UserLoginInput';
 
 @Resolver()
 export class UserResolver {
   @Mutation(() => UserMutationResponse, { nullable: true })
-  async register(@Arg("registerInput") registerInput: UserRegisterInput) 
+  async register(
+    @Arg("registerInput") registerInput: UserRegisterInput, 
+    @Ctx() { req } : Context ) 
   : Promise<UserMutationResponse> {
     try {
 
@@ -36,6 +40,7 @@ export class UserResolver {
       user.username = username;
       user.password = hash;
       await user.save();
+      req.session.userId = user.id;
       return {
         code: 201, 
         success: true, 
@@ -55,7 +60,9 @@ export class UserResolver {
   }
 
   @Mutation(() => UserMutationResponse) 
-  async login(@Arg("loginInput") loginInput: UserLoginInput) 
+  async login(
+    @Arg("loginInput") loginInput: UserLoginInput,
+    @Ctx() { req } : Context) 
     : Promise<UserMutationResponse> {
     const { username, password } = loginInput;
     const userExist = await User.findOneBy({ username });
@@ -63,6 +70,8 @@ export class UserResolver {
     if (userExist) {
       const match = await bcrypt.compare(password, userExist.password);
       if (match) 
+        req.session.userId = userExist.id;
+        console.log(req.session);
         return {
           code: 200, 
           success: true, 
@@ -76,5 +85,19 @@ export class UserResolver {
       success: false, 
       message: "Wrong email or password"
     }
+  }
+
+  @Mutation(() => Boolean) 
+  logout(@Ctx() { req, res } : Context) : Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      res.clearCookie(COOKIE_NAME);
+      req.session.destroy(error => {
+        if (error) {
+          console.log("Destroy session erorr. ", error);
+          resolve(false);
+        }
+        resolve(true);
+      });
+    })
   }
 }

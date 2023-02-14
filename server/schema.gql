@@ -15,6 +15,7 @@ type FieldError {
 
 type Mutation {
   login(loginInput: UserLoginInput!): UserMutationResponse!
+  logout: Boolean!
   register(registerInput: UserRegisterInput!): UserMutationResponse
 }
 
