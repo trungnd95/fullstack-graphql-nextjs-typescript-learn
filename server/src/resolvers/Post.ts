@@ -1,4 +1,4 @@
-import { Arg, Mutation, Resolver } from 'type-graphql';
+import { Arg, ID, Mutation, Query, Resolver } from 'type-graphql';
 import { Post } from './../entities/Post';
 import { PostCreateInput } from './../types/PostMutationInput';
 import { PostMutationResponse } from './../types/PostMutationResponse';
@@ -28,5 +28,15 @@ export class PostResolver {
         success: false,
       };
     }
+  }
+
+  @Query(() => [Post])
+  async posts(): Promise<Post[]> {
+    return await Post.find();
+  }
+
+  @Query(() => Post, { nullable: true })
+  async post(@Arg('id', () => ID) id: number): Promise<Post | null> {
+    return await Post.findOneBy({ id });
   }
 }

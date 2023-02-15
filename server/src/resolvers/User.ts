@@ -58,7 +58,7 @@ export class UserResolver {
   @Mutation(() => UserMutationResponse)
   async login(
     @Arg('loginInput') loginInput: UserLoginInput,
-    @Ctx() { req } : Context,
+    @Ctx() { req }: Context,
   ): Promise<UserMutationResponse> {
     const { username, password } = loginInput;
     const userExist = await User.findOneBy({ username });
@@ -88,7 +88,7 @@ export class UserResolver {
       res.clearCookie(COOKIE_NAME);
       req.session.destroy((error) => {
         if (error) {
-          console.log('Destroy session erorr. ', error);
+          console.log('Destroy session error. ', error);
           resolve(false);
         }
         resolve(true);
