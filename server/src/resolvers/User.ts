@@ -66,7 +66,6 @@ export class UserResolver {
     if (userExist) {
       const match = await bcrypt.compare(password, userExist.password);
       if (match) req.session.userId = userExist.id;
-      console.log(req.session);
       return {
         code: 200,
         success: true,
