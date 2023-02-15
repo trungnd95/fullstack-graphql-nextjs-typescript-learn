@@ -14,10 +14,12 @@ type FieldError {
 }
 
 type Mutation {
-  createPost(createPostInput: PostCreateInput!): PostMutationResponse!
+  create(createPostInput: PostCreateInput!): PostMutationResponse!
+  delete(id: ID!): PostMutationResponse!
   login(loginInput: UserLoginInput!): UserMutationResponse!
   logout: Boolean!
   register(registerInput: UserRegisterInput!): UserMutationResponse
+  update(id: ID!, postUpdateInput: PostCreateInput!): PostMutationResponse!
 }
 
 interface MutationResponse {
