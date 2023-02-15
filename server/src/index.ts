@@ -1,5 +1,6 @@
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import expressPlayground from 'graphql-playground-middleware-express';
+import { PostResolver } from './resolvers/Post';
 
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
@@ -73,7 +74,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, UserResolver],
+      resolvers: [HelloResolver, UserResolver, PostResolver],
       emitSchemaFile: true,
       validate: false,
     }),

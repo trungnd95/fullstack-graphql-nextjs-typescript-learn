@@ -14,6 +14,7 @@ type FieldError {
 }
 
 type Mutation {
+  createPost(createPostInput: PostCreateInput!): PostMutationResponse!
   login(loginInput: UserLoginInput!): UserMutationResponse!
   logout: Boolean!
   register(registerInput: UserRegisterInput!): UserMutationResponse
@@ -23,6 +24,27 @@ interface MutationResponse {
   code: Float!
   errors: [FieldError!]
   message: String
+  success: Boolean!
+}
+
+type Post {
+  createdAt: DateTime!
+  id: ID!
+  text: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input PostCreateInput {
+  text: String!
+  title: String!
+}
+
+type PostMutationResponse implements MutationResponse {
+  code: Float!
+  errors: [FieldError!]
+  message: String
+  post: Post
   success: Boolean!
 }
 
