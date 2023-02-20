@@ -9,12 +9,13 @@ interface InputFieldProps {
 }
 
 function InputField({ ...props }: InputFieldProps) {
-  const [field, { error }] = useField(props);
+  const [field, { error, touched }] = useField(props);
+  console.log(error);
   return (
-    <FormControl m={5}>
+    <FormControl m={5} isInvalid={(error && touched) as boolean | undefined}>
       <FormLabel htmlFor={field.name}>{props.label}</FormLabel>
       <Input id={field.name} {...props} {...field} />
-      {error && <FormErrorMessage>{error}</FormErrorMessage>}
+      {error && touched && <FormErrorMessage>{error}</FormErrorMessage>}
     </FormControl>
   );
 }
