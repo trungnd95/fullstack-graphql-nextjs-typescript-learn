@@ -11,7 +11,7 @@
     "noUnusedLocals": true, // add more
     "noUnusedParameters": true, // add more
     "noImplicitReturns": true, // add more
-    "noFallthroughCasesInSwitch": true, // add more
+    "noFallthroughCasesInSwitch": true, //
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
