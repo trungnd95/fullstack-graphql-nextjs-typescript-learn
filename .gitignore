@@ -2,3 +2,11 @@ server/node_modules
 server/dist/
 server/yarn-error.log
 server/yarn.lock
+
+client/node_modules
+client/.next
+client/out/
+client/build
+client/next-env.d.ts
+client/package-lock.json
+client/yarn.lock
