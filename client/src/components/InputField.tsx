@@ -10,7 +10,6 @@ interface InputFieldProps {
 
 function InputField({ ...props }: InputFieldProps) {
   const [field, { error, touched }] = useField(props);
-  console.log(error);
   return (
     <FormControl m={5} isInvalid={(error && touched) as boolean | undefined}>
       <FormLabel htmlFor={field.name}>{props.label}</FormLabel>

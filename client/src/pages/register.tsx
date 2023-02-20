@@ -1,14 +1,10 @@
 import InputField from '@/components/InputField';
 import Wrapper from '@/components/Wrapper';
+import { useRegisterMutation, UserRegisterInput } from '@/graphql-client/generated/graphql';
 import { Button } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
+import { useRouter } from 'next/router';
 import * as Yup from 'yup';
-
-interface FormValues {
-  username: string;
-  email: string;
-  password: string;
-}
 
 const FormValidateSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email format').required('Required!!!'),
@@ -17,14 +13,27 @@ const FormValidateSchema = Yup.object().shape({
 });
 
 function register() {
+  const router = useRouter();
+  const [registerUser, { loading: _registerLoading, error }] = useRegisterMutation();
   return (
     <Wrapper>
+      {error && <p style={{ color: 'red' }}>{`Failed to request to server. ${error}`}</p>}
       <Formik
-        initialValues={{ username: '', email: '', password: '' } as FormValues}
+        initialValues={{ username: '', email: '', password: '' } as UserRegisterInput}
         validationSchema={FormValidateSchema}
-        onSubmit={(values: FormValues) => console.log(values)}
+        onSubmit={async (values: UserRegisterInput) => {
+          const response = await registerUser({
+            variables: { registerInput: values },
+          });
+
+          if (response.data?.register?.success) {
+            router.push('/');
+          } else {
+            alert(response.data?.register?.message);
+          }
+        }}
       >
-        {({ isSubmitting, errors, touched }) => (
+        {({ isSubmitting }) => (
           <Form>
             <InputField label="Email" name="email" placeholder="john@gmail.com" type="text" />
             <InputField label="Username" name="username" placeholder="john" type="text" />

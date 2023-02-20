@@ -15,6 +15,7 @@ export class UserResolver {
     @Ctx() { req }: Context,
   ): Promise<UserMutationResponse> {
     try {
+      console.log('Run overhere', registerInput);
       const { email, username, password } = registerInput;
 
       let user = await User.findOne({ where: [{ email }, { username }] });
