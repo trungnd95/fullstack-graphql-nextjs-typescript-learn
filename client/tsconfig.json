@@ -5,6 +5,13 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "noImplicitAny": true, // add more from default
+    "strictNullChecks": true, // add more
+    "strictFunctionTypes": true, // add more
+    "noUnusedLocals": true, // add more
+    "noUnusedParameters": true, // add more
+    "noImplicitReturns": true, // add more
+    "noFallthroughCasesInSwitch": true, // add more
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
