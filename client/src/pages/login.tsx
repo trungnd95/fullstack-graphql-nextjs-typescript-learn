@@ -6,7 +6,8 @@ import {
   useLoginMutation,
   UserLoginInput,
 } from '@/graphql-client/generated/graphql';
-import { Button } from '@chakra-ui/react';
+import { useCheckAuth } from '@/utils/checkAuth';
+import { Button, Flex, Spinner, useToast } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
@@ -19,42 +20,62 @@ const FormValidateSchema = Yup.object().shape({
 function login() {
   const router = useRouter();
   const [loginUser, { data, loading: _loginLoading, error }] = useLoginMutation();
-  return (
-    <Wrapper>
-      {error && <p style={{ color: 'red' }}>{`Failed to request to server. ${error}`}</p>}
-      {data && (
-        <p style={{ color: data?.login?.success ? 'green' : 'red' }}>{`${data?.login?.message}`}</p>
-      )}
-      <Formik
-        initialValues={{ username: '', password: '' } as UserLoginInput}
-        validationSchema={FormValidateSchema}
-        onSubmit={async (values: UserLoginInput) => {
-          const response = await loginUser({
-            variables: { loginInput: values },
-            update: (cache, data) => {
-              cache.writeQuery<MeQuery>({
-                query: MeDocument,
-                data: { me: data.data?.login.user },
-              });
-            },
-          });
+  const { data: _queryMeData, loading: _queryMeLoading } = useCheckAuth();
+  const toast = useToast();
 
-          if (response.data?.login?.success) {
-            router.push('/');
-          }
-        }}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <InputField label="Username" name="username" placeholder="john" type="text" />
-            <InputField label="Password" name="password" type="password" />
-            <Button type="submit" colorScheme="blue" w="100%" isLoading={isSubmitting}>
-              Submit
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </Wrapper>
+  return (
+    <>
+      {_queryMeLoading || (!_queryMeLoading && _queryMeData?.me) ? (
+        <Flex>
+          <Spinner />
+        </Flex>
+      ) : (
+        <Wrapper>
+          {error && <p style={{ color: 'red' }}>{`Failed to request to server. ${error}`}</p>}
+          {data && (
+            <p
+              style={{ color: data?.login?.success ? 'green' : 'red' }}
+            >{`${data?.login?.message}`}</p>
+          )}
+          <Formik
+            initialValues={{ username: '', password: '' } as UserLoginInput}
+            validationSchema={FormValidateSchema}
+            onSubmit={async (values: UserLoginInput) => {
+              const response = await loginUser({
+                variables: { loginInput: values },
+                update: (cache, data) => {
+                  cache.writeQuery<MeQuery>({
+                    query: MeDocument,
+                    data: { me: data.data?.login.user },
+                  });
+                },
+              });
+
+              if (response.data?.login?.success) {
+                router.push('/');
+                toast({
+                  title: 'Welcome',
+                  description: response.data?.login?.user?.username,
+                  status: 'success',
+                  duration: 2000,
+                  isClosable: true,
+                });
+              }
+            }}
+          >
+            {({ isSubmitting }) => (
+              <Form>
+                <InputField label="Username" name="username" placeholder="john" type="text" />
+                <InputField label="Password" name="password" type="password" />
+                <Button type="submit" colorScheme="blue" w="100%" isLoading={isSubmitting}>
+                  Submit
+                </Button>
+              </Form>
+            )}
+          </Formik>
+        </Wrapper>
+      )}
+    </>
   );
 }
 
