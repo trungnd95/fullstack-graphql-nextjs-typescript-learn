@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { User } from '../entities/User';
 import { Context } from '../types/Context';
 import { UserRegisterInput } from '../types/UserRegisterInput';
@@ -9,13 +9,18 @@ import { UserLoginInput } from './../types/UserLoginInput';
 
 @Resolver()
 export class UserResolver {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: Context): Promise<User | null | undefined> {
+    if (!req.session.userId) return null;
+    return await User.findOneBy({ id: req.session.userId });
+  }
+
   @Mutation(() => UserMutationResponse, { nullable: true })
   async register(
     @Arg('registerInput') registerInput: UserRegisterInput,
     @Ctx() { req }: Context,
   ): Promise<UserMutationResponse> {
     try {
-      console.log('Run overhere', registerInput);
       const { email, username, password } = registerInput;
 
       let user = await User.findOne({ where: [{ email }, { username }] });
@@ -66,12 +71,19 @@ export class UserResolver {
 
     if (userExist) {
       const match = await bcrypt.compare(password, userExist.password);
-      if (match) req.session.userId = userExist.id;
+      if (match) {
+        req.session.userId = userExist.id;
+        return {
+          code: 200,
+          success: true,
+          user: userExist,
+          message: 'Login successful',
+        };
+      }
       return {
-        code: 200,
-        success: true,
-        user: userExist,
-        message: 'Login successful',
+        code: 400,
+        success: false,
+        message: 'Wrong email or password',
       };
     }
 

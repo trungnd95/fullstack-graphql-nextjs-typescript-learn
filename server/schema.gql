@@ -52,6 +52,7 @@ type PostMutationResponse implements MutationResponse {
 
 type Query {
   hello: String!
+  me: User
   post(id: ID!): Post
   posts: [Post!]!
 }

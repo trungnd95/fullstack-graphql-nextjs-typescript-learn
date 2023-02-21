@@ -1,6 +1,11 @@
 import InputField from '@/components/InputField';
 import Wrapper from '@/components/Wrapper';
-import { useLoginMutation, UserLoginInput } from '@/graphql-client/generated/graphql';
+import {
+  MeDocument,
+  MeQuery,
+  useLoginMutation,
+  UserLoginInput,
+} from '@/graphql-client/generated/graphql';
 import { Button } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
@@ -17,13 +22,21 @@ function login() {
   return (
     <Wrapper>
       {error && <p style={{ color: 'red' }}>{`Failed to request to server. ${error}`}</p>}
-      {data && <p style={{ color: data?.login?.success ? 'green' : 'red'}}>{`${data?.login?.message}`}</p>}
+      {data && (
+        <p style={{ color: data?.login?.success ? 'green' : 'red' }}>{`${data?.login?.message}`}</p>
+      )}
       <Formik
         initialValues={{ username: '', password: '' } as UserLoginInput}
         validationSchema={FormValidateSchema}
         onSubmit={async (values: UserLoginInput) => {
           const response = await loginUser({
             variables: { loginInput: values },
+            update: (cache, data) => {
+              cache.writeQuery<MeQuery>({
+                query: MeDocument,
+                data: { me: data.data?.login.user },
+              });
+            },
           });
 
           if (response.data?.login?.success) {
