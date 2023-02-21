@@ -130,6 +130,8 @@ export type UserRegisterInput = {
   username: Scalars['String'];
 };
 
+export type UserFieldsFragment = { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any };
+
 export type RegisterMutationVariables = Exact<{
   registerInput: UserRegisterInput;
 }>;
@@ -137,7 +139,22 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register?: { __typename?: 'UserMutationResponse', code: number, success: boolean, message?: string | null, user?: { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any } | null } | null };
 
+export type LoginMutationVariables = Exact<{
+  loginInput: UserLoginInput;
+}>;
 
+
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserMutationResponse', code: number, success: boolean, message?: string | null, user?: { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any } | null } };
+
+export const UserFieldsFragmentDoc = gql`
+    fragment userFields on User {
+  id
+  username
+  email
+  createdAt
+  updatedAt
+}
+    `;
 export const RegisterDocument = gql`
     mutation Register($registerInput: UserRegisterInput!) {
   register(registerInput: $registerInput) {
@@ -145,15 +162,11 @@ export const RegisterDocument = gql`
     success
     message
     user {
-      id
-      username
-      email
-      createdAt
-      updatedAt
+      ...userFields
     }
   }
 }
-    `;
+    ${UserFieldsFragmentDoc}`;
 export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
 
 /**
@@ -180,6 +193,44 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const LoginDocument = gql`
+    mutation Login($loginInput: UserLoginInput!) {
+  login(loginInput: $loginInput) {
+    code
+    success
+    message
+    user {
+      ...userFields
+    }
+  }
+}
+    ${UserFieldsFragmentDoc}`;
+export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
+
+/**
+ * __useLoginMutation__
+ *
+ * To run a mutation, you first call `useLoginMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLoginMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [loginMutation, { data, loading, error }] = useLoginMutation({
+ *   variables: {
+ *      loginInput: // value for 'loginInput'
+ *   },
+ * });
+ */
+export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
+      }
+export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
+export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export type FieldErrorKeySpecifier = ('field' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,

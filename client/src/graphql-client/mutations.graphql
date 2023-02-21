@@ -4,11 +4,18 @@ mutation Register($registerInput: UserRegisterInput!) {
     success
     message
     user {
-      id
-      username
-      email
-      createdAt
-      updatedAt
+      ...userFields
+    }
+  }
+}
+
+mutation Login($loginInput: UserLoginInput!) {
+  login(loginInput: $loginInput) {
+    code
+    success
+    message
+    user {
+      ...userFields
     }
   }
 }
