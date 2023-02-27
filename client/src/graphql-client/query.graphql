@@ -3,3 +3,9 @@ query Me {
     ...userFields
   }
 }
+
+query Post {
+  posts {
+    ...postFields
+  }
+}

@@ -5,3 +5,11 @@ fragment userFields on User {
   createdAt
   updatedAt
 }
+
+fragment postFields on Post {
+  id
+  title
+  text
+  createdAt
+  updatedAt
+}
