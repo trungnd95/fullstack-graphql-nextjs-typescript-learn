@@ -33,6 +33,7 @@ type Post {
   createdAt: DateTime!
   id: ID!
   text: String!
+  textSnippet: String!
   title: String!
   updatedAt: DateTime!
 }

@@ -5,6 +5,6 @@
     "source.fixAll": true,
     "source.organizeImports": true
   },
-  "cSpell.words": ["Chakra", "codegen", "Formik"],
+  "cSpell.words": ["Chakra", "codegen", "Formik", "middlewares"],
   "security.workspace.trust.enabled": false
 }

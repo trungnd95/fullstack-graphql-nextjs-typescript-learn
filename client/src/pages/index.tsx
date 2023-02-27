@@ -22,7 +22,7 @@ export default function Home() {
                   <Heading>{post.title}</Heading>
                 </Link>
                 <Text fontStyle={'italic'}>Posted by: author </Text>
-                <Text mt={10}>{post.text}</Text>
+                <Text mt={10}>{post.textSnippet}</Text>
               </Box>
               <Flex direction={'row-reverse'} gap={4} w={'full'}>
                 <EditIcon boxSize={8} color="orange.400" />

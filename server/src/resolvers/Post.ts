@@ -1,11 +1,25 @@
-import { Arg, ID, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import {
+  Arg,
+  FieldResolver,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+  UseMiddleware,
+} from 'type-graphql';
 import { Post } from './../entities/Post';
 import { CheckAuth } from './../middlewares/checkAuth';
 import { PostCreateInput } from './../types/PostMutationInput';
 import { PostMutationResponse } from './../types/PostMutationResponse';
 
-@Resolver()
+@Resolver(() => Post)
 export class PostResolver {
+  @FieldResolver(() => String)
+  textSnippet(@Root() rootPost: Post) {
+    return rootPost.text.slice(0, 50);
+  }
+
   @Mutation(() => PostMutationResponse)
   @UseMiddleware(CheckAuth)
   async create(
