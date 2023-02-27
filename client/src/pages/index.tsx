@@ -1,27 +1,38 @@
-import Navbar from '@/components/Navbar';
+import { Layout } from '@/components/Layout';
 import { Post, PostDocument, usePostQuery } from '@/graphql-client/generated/graphql';
 import { addApolloState, initializeApollo } from '@/lib/apolloClient';
-import { Flex, Spinner } from '@chakra-ui/react';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { Box, Flex, Heading, Link, Spinner, Stack, Text } from '@chakra-ui/react';
+import NextLink from 'next/link';
 
 export default function Home() {
   const { data, loading } = usePostQuery();
   return (
-    <>
-      <Navbar />
+    <Layout>
       {loading ? (
         <Flex justify="center" align="center">
           <Spinner />
         </Flex>
       ) : (
-        <div>
-          <ul>
-            {data?.posts.map((post: Post) => (
-              <li key={post.id}>{post.title}</li>
-            ))}
-          </ul>
-        </div>
+        <Stack spacing="10px">
+          {data?.posts.map((post: Post) => (
+            <Flex shadow="md" p={4} direction="column">
+              <Box w={'full'}>
+                <Link as={NextLink} href={`/post/${post.id}`} passHref>
+                  <Heading>{post.title}</Heading>
+                </Link>
+                <Text fontStyle={'italic'}>Posted by: author </Text>
+                <Text mt={10}>{post.text}</Text>
+              </Box>
+              <Flex direction={'row-reverse'} gap={4} w={'full'}>
+                <EditIcon boxSize={8} color="orange.400" />
+                <DeleteIcon boxSize={8} color="red.400" />
+              </Flex>
+            </Flex>
+          ))}
+        </Stack>
       )}
-    </>
+    </Layout>
   );
 }
 
