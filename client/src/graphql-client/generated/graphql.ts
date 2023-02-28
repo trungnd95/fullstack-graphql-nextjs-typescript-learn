@@ -71,8 +71,10 @@ export type Post = {
   createdAt: Scalars['DateTime'];
   id: Scalars['ID'];
   text: Scalars['String'];
+  textSnippet: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
+  user: User;
 };
 
 export type PostCreateInput = {
@@ -133,7 +135,7 @@ export type UserRegisterInput = {
 
 export type UserFieldsFragment = { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any };
 
-export type PostFieldsFragment = { __typename?: 'Post', id: string, title: string, text: string, createdAt: any, updatedAt: any };
+export type PostFieldsFragment = { __typename?: 'Post', id: string, title: string, text: string, textSnippet: string, createdAt: any, updatedAt: any };
 
 export type RegisterMutationVariables = Exact<{
   registerInput: UserRegisterInput;
@@ -162,7 +164,7 @@ export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: st
 export type PostQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, title: string, text: string, createdAt: any, updatedAt: any }> };
+export type PostQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, title: string, text: string, textSnippet: string, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any } }> };
 
 export const UserFieldsFragmentDoc = gql`
     fragment userFields on User {
@@ -178,6 +180,7 @@ export const PostFieldsFragmentDoc = gql`
   id
   title
   text
+  textSnippet
   createdAt
   updatedAt
 }
@@ -326,9 +329,13 @@ export const PostDocument = gql`
     query Post {
   posts {
     ...postFields
+    user {
+      ...userFields
+    }
   }
 }
-    ${PostFieldsFragmentDoc}`;
+    ${PostFieldsFragmentDoc}
+${UserFieldsFragmentDoc}`;
 
 /**
  * __usePostQuery__
@@ -377,13 +384,15 @@ export type MutationResponseFieldPolicy = {
 	message?: FieldPolicy<any> | FieldReadFunction<any>,
 	success?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('createdAt' | 'id' | 'text' | 'title' | 'updatedAt' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('createdAt' | 'id' | 'text' | 'textSnippet' | 'title' | 'updatedAt' | 'user' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
+	textSnippet?: FieldPolicy<any> | FieldReadFunction<any>,
 	title?: FieldPolicy<any> | FieldReadFunction<any>,
-	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>
+	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	user?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PostMutationResponseKeySpecifier = ('code' | 'errors' | 'message' | 'post' | 'success' | PostMutationResponseKeySpecifier)[];
 export type PostMutationResponseFieldPolicy = {

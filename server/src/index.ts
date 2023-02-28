@@ -1,5 +1,4 @@
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import expressPlayground from 'graphql-playground-middleware-express';
 import { PostResolver } from './resolvers/Post';
 
 import { ApolloServer } from '@apollo/server';
@@ -94,7 +93,7 @@ const main = async () => {
     }),
   );
   /// Option for using playground
-  app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
+  //app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
 
   // Server listen
   const PORT = process.env.PORT || 4000;

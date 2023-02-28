@@ -16,12 +16,12 @@ export default function Home() {
       ) : (
         <Stack spacing="10px">
           {data?.posts.map((post: Post) => (
-            <Flex shadow="md" p={4} direction="column">
+            <Flex shadow="md" p={4} direction="column" key={post.id}>
               <Box w={'full'}>
                 <Link as={NextLink} href={`/post/${post.id}`} passHref>
                   <Heading>{post.title}</Heading>
                 </Link>
-                <Text fontStyle={'italic'}>Posted by: author </Text>
+                <Text fontStyle={'italic'}>Posted by: {post.user.username} </Text>
                 <Text mt={10}>{post.textSnippet}</Text>
               </Box>
               <Flex direction={'row-reverse'} gap={4} w={'full'}>

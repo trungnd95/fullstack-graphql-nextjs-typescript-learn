@@ -36,6 +36,7 @@ type Post {
   textSnippet: String!
   title: String!
   updatedAt: DateTime!
+  user: User!
 }
 
 input PostCreateInput {
