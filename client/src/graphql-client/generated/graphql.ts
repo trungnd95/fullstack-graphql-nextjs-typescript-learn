@@ -66,6 +66,14 @@ export type MutationResponse = {
   success: Scalars['Boolean'];
 };
 
+export type PaginatedPost = {
+  __typename?: 'PaginatedPost';
+  cursor: Scalars['DateTime'];
+  hasMore: Scalars['Boolean'];
+  paginatedPosts?: Maybe<Array<Post>>;
+  totalCount: Scalars['Float'];
+};
+
 export type Post = {
   __typename?: 'Post';
   createdAt: Scalars['DateTime'];
@@ -96,12 +104,18 @@ export type Query = {
   hello: Scalars['String'];
   me?: Maybe<User>;
   post?: Maybe<Post>;
-  posts: Array<Post>;
+  posts: PaginatedPost;
 };
 
 
 export type QueryPostArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryPostsArgs = {
+  cursor?: InputMaybe<Scalars['String']>;
+  limit: Scalars['Int'];
 };
 
 export type User = {
@@ -161,10 +175,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any } | null };
 
-export type PostQueryVariables = Exact<{ [key: string]: never; }>;
+export type PaginatedPostsQueryVariables = Exact<{
+  limit: Scalars['Int'];
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
 
 
-export type PostQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: string, title: string, text: string, textSnippet: string, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any } }> };
+export type PaginatedPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPost', totalCount: number, cursor: any, hasMore: boolean, paginatedPosts?: Array<{ __typename?: 'Post', id: string, title: string, text: string, textSnippet: string, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, username: string, email: string, createdAt: any, updatedAt: any } }> | null } };
 
 export const UserFieldsFragmentDoc = gql`
     fragment userFields on User {
@@ -325,12 +342,17 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
-export const PostDocument = gql`
-    query Post {
-  posts {
-    ...postFields
-    user {
-      ...userFields
+export const PaginatedPostsDocument = gql`
+    query PaginatedPosts($limit: Int!, $cursor: String) {
+  posts(limit: $limit, cursor: $cursor) {
+    totalCount
+    cursor
+    hasMore
+    paginatedPosts {
+      ...postFields
+      user {
+        ...userFields
+      }
     }
   }
 }
@@ -338,31 +360,33 @@ export const PostDocument = gql`
 ${UserFieldsFragmentDoc}`;
 
 /**
- * __usePostQuery__
+ * __usePaginatedPostsQuery__
  *
- * To run a query within a React component, call `usePostQuery` and pass it any options that fit your needs.
- * When your component renders, `usePostQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `usePaginatedPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaginatedPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePostQuery({
+ * const { data, loading, error } = usePaginatedPostsQuery({
  *   variables: {
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
  *   },
  * });
  */
-export function usePostQuery(baseOptions?: Apollo.QueryHookOptions<PostQuery, PostQueryVariables>) {
+export function usePaginatedPostsQuery(baseOptions: Apollo.QueryHookOptions<PaginatedPostsQuery, PaginatedPostsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PostQuery, PostQueryVariables>(PostDocument, options);
+        return Apollo.useQuery<PaginatedPostsQuery, PaginatedPostsQueryVariables>(PaginatedPostsDocument, options);
       }
-export function usePostLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostQuery, PostQueryVariables>) {
+export function usePaginatedPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaginatedPostsQuery, PaginatedPostsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PostQuery, PostQueryVariables>(PostDocument, options);
+          return Apollo.useLazyQuery<PaginatedPostsQuery, PaginatedPostsQueryVariables>(PaginatedPostsDocument, options);
         }
-export type PostQueryHookResult = ReturnType<typeof usePostQuery>;
-export type PostLazyQueryHookResult = ReturnType<typeof usePostLazyQuery>;
-export type PostQueryResult = Apollo.QueryResult<PostQuery, PostQueryVariables>;
+export type PaginatedPostsQueryHookResult = ReturnType<typeof usePaginatedPostsQuery>;
+export type PaginatedPostsLazyQueryHookResult = ReturnType<typeof usePaginatedPostsLazyQuery>;
+export type PaginatedPostsQueryResult = Apollo.QueryResult<PaginatedPostsQuery, PaginatedPostsQueryVariables>;
 export type FieldErrorKeySpecifier = ('field' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -383,6 +407,13 @@ export type MutationResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>,
 	success?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type PaginatedPostKeySpecifier = ('cursor' | 'hasMore' | 'paginatedPosts' | 'totalCount' | PaginatedPostKeySpecifier)[];
+export type PaginatedPostFieldPolicy = {
+	cursor?: FieldPolicy<any> | FieldReadFunction<any>,
+	hasMore?: FieldPolicy<any> | FieldReadFunction<any>,
+	paginatedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
+	totalCount?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PostKeySpecifier = ('createdAt' | 'id' | 'text' | 'textSnippet' | 'title' | 'updatedAt' | 'user' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
@@ -437,6 +468,10 @@ export type StrictTypedTypePolicies = {
 	MutationResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | MutationResponseKeySpecifier | (() => undefined | MutationResponseKeySpecifier),
 		fields?: MutationResponseFieldPolicy,
+	},
+	PaginatedPost?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | PaginatedPostKeySpecifier | (() => undefined | PaginatedPostKeySpecifier),
+		fields?: PaginatedPostFieldPolicy,
 	},
 	Post?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | PostKeySpecifier | (() => undefined | PostKeySpecifier),

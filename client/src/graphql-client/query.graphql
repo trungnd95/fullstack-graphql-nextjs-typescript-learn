@@ -4,11 +4,16 @@ query Me {
   }
 }
 
-query Post {
-  posts {
-    ...postFields
-    user {
-      ...userFields
+query PaginatedPosts($limit: Int!, $cursor: String) {
+  posts(limit: $limit, cursor: $cursor) {
+    totalCount
+    cursor
+    hasMore
+    paginatedPosts {
+      ...postFields
+      user {
+        ...userFields
+      }
     }
   }
 }

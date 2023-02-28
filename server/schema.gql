@@ -29,6 +29,13 @@ interface MutationResponse {
   success: Boolean!
 }
 
+type PaginatedPost {
+  cursor: DateTime!
+  hasMore: Boolean!
+  paginatedPosts: [Post!]
+  totalCount: Float!
+}
+
 type Post {
   createdAt: DateTime!
   id: ID!
@@ -56,7 +63,7 @@ type Query {
   hello: String!
   me: User
   post(id: ID!): Post
-  posts: [Post!]!
+  posts(cursor: String, limit: Int!): PaginatedPost!
 }
 
 type User {

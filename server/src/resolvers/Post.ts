@@ -2,14 +2,17 @@ import {
   Arg,
   FieldResolver,
   ID,
+  Int,
   Mutation,
   Query,
   Resolver,
   Root,
   UseMiddleware,
 } from 'type-graphql';
+import { LessThan } from 'typeorm';
 import { Post } from './../entities/Post';
 import { CheckAuth } from './../middlewares/checkAuth';
+import { PaginatedPost } from './../types/PaginatedPost';
 import { PostCreateInput } from './../types/PostMutationInput';
 import { PostMutationResponse } from './../types/PostMutationResponse';
 
@@ -47,13 +50,40 @@ export class PostResolver {
     }
   }
 
-  @Query(() => [Post])
-  async posts(): Promise<Post[]> {
-    return await Post.find({
+  @Query(() => PaginatedPost)
+  async posts(
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor?: string,
+  ): Promise<PaginatedPost> {
+    const realLimit = Math.min(limit, 5);
+    const findConditions: { [key: string]: unknown } = {
+      order: {
+        updatedAt: 'ASC',
+      },
+      take: realLimit,
       relations: {
         user: true,
       },
-    });
+    };
+
+    if (cursor) {
+      findConditions.where = {
+        updatedAt: LessThan(cursor),
+      };
+    }
+
+    console.log('Query paginated posts: ', findConditions);
+    const posts = await Post.find(findConditions);
+    console.log(posts);
+
+    return {
+      totalCount: (await Post.count()) as number,
+      cursor: posts[posts.length - 1].updatedAt,
+      hasMore:
+        posts[posts.length - 1].updatedAt.toString() !==
+        (await Post.find({ order: { updatedAt: 'DESC' }, take: 1 }))[0]?.updatedAt.toString(),
+      paginatedPosts: posts,
+    };
   }
 
   @Query(() => Post, { nullable: true })

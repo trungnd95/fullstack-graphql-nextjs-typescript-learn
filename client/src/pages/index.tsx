@@ -1,12 +1,35 @@
 import { Layout } from '@/components/Layout';
-import { Post, PostDocument, usePostQuery } from '@/graphql-client/generated/graphql';
+import {
+  PaginatedPostsDocument,
+  Post,
+  usePaginatedPostsQuery,
+} from '@/graphql-client/generated/graphql';
 import { addApolloState, initializeApollo } from '@/lib/apolloClient';
+import { NetworkStatus } from '@apollo/client';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { Box, Flex, Heading, Link, Spinner, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Link, Spinner, Stack, Text } from '@chakra-ui/react';
 import NextLink from 'next/link';
 
+const limit = 1;
 export default function Home() {
-  const { data, loading } = usePostQuery();
+  const { data, loading, error, fetchMore, networkStatus } = usePaginatedPostsQuery({
+    variables: {
+      limit,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
+  if (data) console.log(data);
+
+  const isLoadingMore = networkStatus === NetworkStatus.fetchMore;
+
+  const loadMorePosts = () => {
+    fetchMore({
+      variables: {
+        limit,
+        cursor: data?.posts.cursor,
+      },
+    });
+  };
   return (
     <Layout>
       {loading ? (
@@ -15,7 +38,7 @@ export default function Home() {
         </Flex>
       ) : (
         <Stack spacing="10px">
-          {data?.posts.map((post: Post) => (
+          {data?.posts.paginatedPosts?.map((post: Post) => (
             <Flex shadow="md" p={4} direction="column" key={post.id}>
               <Box w={'full'}>
                 <Link as={NextLink} href={`/post/${post.id}`} passHref>
@@ -30,6 +53,13 @@ export default function Home() {
               </Flex>
             </Flex>
           ))}
+          {data?.posts.hasMore && (
+            <Flex justify={'center'} align="center">
+              <Button type="button" isLoading={isLoadingMore} onClick={loadMorePosts}>
+                {isLoadingMore ? 'Loading' : 'Load More'}
+              </Button>
+            </Flex>
+          )}
         </Stack>
       )}
     </Layout>
@@ -40,7 +70,10 @@ export async function getStaticProps() {
   const apolloClient = initializeApollo();
 
   await apolloClient.query({
-    query: PostDocument,
+    query: PaginatedPostsDocument,
+    variables: {
+      limit,
+    },
   });
 
   return addApolloState(apolloClient, {
