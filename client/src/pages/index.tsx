@@ -10,7 +10,7 @@ import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react';
 import NextLink from 'next/link';
 
-const limit = 1;
+const limit = 3;
 export default function Home() {
   const { data, loading, error, fetchMore, networkStatus } = usePaginatedPostsQuery({
     variables: {
@@ -42,7 +42,10 @@ export default function Home() {
               <Link as={NextLink} href={`/post/${post.id}`} passHref>
                 <Heading>{post.title}</Heading>
               </Link>
-              <Text fontStyle={'italic'}>Posted by: {post.user.username} </Text>
+              <Text fontStyle={'italic'}>
+                Posted by: <b>{post.user.username}</b> on{' '}
+                {new Date(post.updatedAt).toLocaleString('en-GB', { timeZone: 'UTC' })}
+              </Text>
               <Text mt={10}>{post.textSnippet}</Text>
             </Box>
             <Flex direction={'row-reverse'} gap={4} w={'full'}>

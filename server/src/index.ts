@@ -1,13 +1,12 @@
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { PostResolver } from './resolvers/Post';
-
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { json } from 'body-parser';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
+import expressPlayground from 'graphql-playground-middleware-express';
 import http from 'http';
 import { createClient } from 'redis';
 import 'reflect-metadata';
@@ -17,6 +16,7 @@ import { COOKIE_NAME, __PROD__ } from './constants';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
 import { HelloResolver } from './resolvers/Hello';
+import { PostResolver } from './resolvers/Post';
 import { UserResolver } from './resolvers/User';
 require('dotenv').config();
 
@@ -93,7 +93,7 @@ const main = async () => {
     }),
   );
   /// Option for using playground
-  //app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
+  app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
 
   // Server listen
   const PORT = process.env.PORT || 4000;

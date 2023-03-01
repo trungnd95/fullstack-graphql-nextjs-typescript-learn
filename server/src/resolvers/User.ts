@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root } from 'type-graphql';
 import { User } from '../entities/User';
 import { Context } from '../types/Context';
 import { UserRegisterInput } from '../types/UserRegisterInput';
@@ -7,8 +7,13 @@ import { COOKIE_NAME } from './../constants';
 import { UserMutationResponse } from './../types/UseMutationResponse';
 import { UserLoginInput } from './../types/UserLoginInput';
 
-@Resolver()
+@Resolver(() => User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() rootUser: User, @Ctx() { req }: Context) {
+    return req.session.userId === rootUser.id ? rootUser.email : '';
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: Context): Promise<User | null | undefined> {
     if (!req.session.userId) return null;

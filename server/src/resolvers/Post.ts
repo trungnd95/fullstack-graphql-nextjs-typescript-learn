@@ -1,5 +1,6 @@
 import {
   Arg,
+  Ctx,
   FieldResolver,
   ID,
   Int,
@@ -7,11 +8,13 @@ import {
   Query,
   Resolver,
   Root,
-  UseMiddleware
+  UseMiddleware,
 } from 'type-graphql';
 import { LessThan } from 'typeorm';
 import { Post } from './../entities/Post';
+import { User } from './../entities/User';
 import { CheckAuth } from './../middlewares/checkAuth';
+import { Context } from './../types/Context';
 import { PaginatedPost } from './../types/PaginatedPost';
 import { PostCreateInput } from './../types/PostMutationInput';
 import { PostMutationResponse } from './../types/PostMutationResponse';
@@ -27,18 +30,27 @@ export class PostResolver {
   @UseMiddleware(CheckAuth)
   async create(
     @Arg('createPostInput') createPostInput: PostCreateInput,
+    @Ctx() { req }: Context,
   ): Promise<PostMutationResponse> {
     try {
-      console.log('In to create post');
-      const post = new Post();
-      post.title = createPostInput.title;
-      post.text = createPostInput.text;
-      await post.save();
+      const author = await User.findOneBy({ id: req.session.userId });
+      if (author) {
+        const post = new Post();
+        post.title = createPostInput.title;
+        post.text = createPostInput.text;
+        post.user = author;
+        await post.save();
+        return {
+          code: 500,
+          message: 'Post created successfully',
+          success: true,
+          post,
+        };
+      }
       return {
         code: 500,
-        message: 'Post created successfully',
-        success: true,
-        post,
+        message: `author is not found in db`,
+        success: false,
       };
     } catch (error) {
       console.log('error creating post', error);
@@ -55,8 +67,6 @@ export class PostResolver {
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor?: string,
   ): Promise<PaginatedPost> {
-    console.log('limit: ', limit);
-    console.log('cursor: ', cursor);
     const realLimit = Math.min(limit, 5);
     const findConditions: { [key: string]: unknown } = {
       order: {
@@ -74,7 +84,6 @@ export class PostResolver {
       };
     }
 
-    console.log('Query paginated posts: ', findConditions);
     const posts = await Post.find(findConditions);
 
     return {
@@ -97,6 +106,7 @@ export class PostResolver {
   async update(
     @Arg('id', () => ID) id: number,
     @Arg('postUpdateInput') postUpdateInput: PostCreateInput,
+    @Ctx() { req }: Context,
   ): Promise<PostMutationResponse> {
     try {
       const existPost = await Post.findOneBy({ id });
@@ -106,6 +116,14 @@ export class PostResolver {
           success: false,
           message: 'Post not found',
         };
+
+      if (existPost.user.id !== req.session.userId) {
+        return {
+          code: 403,
+          success: false,
+          message: 'Not allowed',
+        };
+      }
 
       existPost.title = postUpdateInput.title;
       existPost.text = postUpdateInput.text;
@@ -128,15 +146,27 @@ export class PostResolver {
 
   @Mutation(() => PostMutationResponse)
   @UseMiddleware(CheckAuth)
-  async delete(@Arg('id', () => ID) id: number): Promise<PostMutationResponse> {
+  async delete(
+    @Arg('id', () => ID) id: number,
+    @Ctx() { req }: Context,
+  ): Promise<PostMutationResponse> {
     try {
       const existPost = await Post.findOneBy({ id });
+
       if (!existPost)
         return {
           code: 400,
           success: false,
           message: 'Post not found',
         };
+      if (existPost.user.id !== req.session.userId) {
+        return {
+          code: 403,
+          success: false,
+          message: 'Not allowed',
+        };
+      }
+
       await Post.delete({ id });
       return {
         code: 201,

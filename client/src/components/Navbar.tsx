@@ -43,6 +43,9 @@ function Navbar() {
               <Link as={NextLink} href="#" passHref onClick={handleLogout}>
                 Logout
               </Link>
+              <Link as={NextLink} href="/post/create" passHref ml={5}>
+                Create Post
+              </Link>
             </>
           )}
         </Box>

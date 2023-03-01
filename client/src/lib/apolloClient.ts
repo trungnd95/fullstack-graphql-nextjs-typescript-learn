@@ -40,7 +40,7 @@ function createApolloClient() {
                 if (existing)
                   return {
                     ...incoming,
-                    paginatedPosts: [...incoming.paginatedPosts, ...existing.paginatedPosts],
+                    paginatedPosts: [...existing.paginatedPosts, ...incoming.paginatedPosts],
                   };
                 return incoming;
               },

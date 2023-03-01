@@ -23,3 +23,17 @@ mutation Login($loginInput: UserLoginInput!) {
 mutation Logout {
   logout
 }
+
+mutation createPost($createPostInput: PostCreateInput!) {
+  create(createPostInput: $createPostInput) {
+    code
+    success
+    message
+    post {
+      ...postFields
+      user {
+        ...userFields
+      }
+    }
+  }
+}
