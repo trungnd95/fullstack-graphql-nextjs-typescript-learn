@@ -98,7 +98,7 @@ export class PostResolver {
 
   @Query(() => Post, { nullable: true })
   async post(@Arg('id', () => ID) id: number): Promise<Post | null> {
-    return await Post.findOneBy({ id });
+    return await Post.findOne({ where: { id }, relations: { user: true } });
   }
 
   @Mutation(() => PostMutationResponse)

@@ -6,8 +6,9 @@ import {
   useCreatePostMutation,
 } from '@/graphql-client/generated/graphql';
 import { useCheckAuth } from '@/utils/checkAuth';
-import { Button, Flex, Spinner, useToast } from '@chakra-ui/react';
+import { Button, Flex, Link, Spinner, useToast } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import * as Yup from 'yup';
@@ -73,15 +74,20 @@ export const CreatePost: React.FC<{}> = () => {
           <Form>
             <InputField label="Title" name="title" placeholder="title" type="text" />
             <InputField label="Text" name="text" placeholder="text" textarea={true} />
-            <Flex align="center">
+            <Flex align="center" justify={'space-around'}>
               <Button
                 type="submit"
                 colorScheme="blue"
-                w="100%"
+                w="45%"
                 textAlign={'center'}
                 isLoading={isSubmitting}
               >
                 Create
+              </Button>
+              <Button colorScheme="gray" w="45%" textAlign={'center'} isLoading={isSubmitting}>
+                <Link as={NextLink} href="/" passHref>
+                  Back to Home
+                </Link>
               </Button>
             </Flex>
           </Form>

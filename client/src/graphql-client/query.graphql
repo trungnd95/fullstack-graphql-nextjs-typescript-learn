@@ -17,3 +17,12 @@ query PaginatedPosts($limit: Int!, $cursor: String) {
     }
   }
 }
+
+query Post($id: ID!) {
+  post(id: $id) {
+    ...postFields
+    user {
+      ...userFields
+    }
+  }
+}
