@@ -29,7 +29,26 @@ function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: from([errorLink, httpLink]),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            posts: {
+              keyArgs: false, // Don't cache separate results based on
+              // any of this field's arguments.
+              merge(existing, incoming) {
+                if (existing)
+                  return {
+                    ...incoming,
+                    paginatedPosts: [...incoming.paginatedPosts, ...existing.paginatedPosts],
+                  };
+                return incoming;
+              },
+            },
+          },
+        },
+      },
+    }),
     connectToDevTools: true,
   });
 }
