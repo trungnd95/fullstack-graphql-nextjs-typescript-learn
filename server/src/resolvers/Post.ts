@@ -109,7 +109,8 @@ export class PostResolver {
     @Ctx() { req }: Context,
   ): Promise<PostMutationResponse> {
     try {
-      const existPost = await Post.findOneBy({ id });
+      console.log('params data: ', id, postUpdateInput);
+      const existPost = await Post.findOne({ where: { id }, relations: { user: true } });
       if (!existPost)
         return {
           code: 400,
@@ -127,6 +128,7 @@ export class PostResolver {
 
       existPost.title = postUpdateInput.title;
       existPost.text = postUpdateInput.text;
+
       await existPost.save();
       return {
         code: 201,
@@ -151,7 +153,7 @@ export class PostResolver {
     @Ctx() { req }: Context,
   ): Promise<PostMutationResponse> {
     try {
-      const existPost = await Post.findOneBy({ id });
+      const existPost = await Post.findOne({ where: { id }, relations: { user: true } });
 
       if (!existPost)
         return {

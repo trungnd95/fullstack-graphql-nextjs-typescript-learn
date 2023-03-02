@@ -2,22 +2,33 @@ import { Layout } from '@/components/Layout';
 import {
   PaginatedPostsDocument,
   Post,
+  useDeletePostMutation,
+  useMeQuery,
   usePaginatedPostsQuery,
 } from '@/graphql-client/generated/graphql';
 import { addApolloState, initializeApollo } from '@/lib/apolloClient';
 import { NetworkStatus } from '@apollo/client';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import NextLink from 'next/link';
 
 const limit = 3;
 export default function Home() {
-  const { data, loading, error, fetchMore, networkStatus } = usePaginatedPostsQuery({
+  const toast = useToast();
+  const { data: meData, error: meError } = useMeQuery();
+  const {
+    data,
+    loading: _loading,
+    error: _error,
+    fetchMore,
+    networkStatus,
+  } = usePaginatedPostsQuery({
     variables: {
       limit,
     },
     notifyOnNetworkStatusChange: true,
   });
+  const [deletePost] = useDeletePostMutation();
 
   const isLoadingMore = networkStatus === NetworkStatus.fetchMore;
 
@@ -27,6 +38,34 @@ export default function Home() {
         cursor: data?.posts.cursor,
       },
     });
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    const response = await deletePost({
+      variables: {
+        deleteId: postId,
+      },
+    });
+
+    if (response.data) {
+      if (response.data.delete.success) {
+        toast({
+          title: 'Success',
+          description: response.data.delete.message,
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: response.data.delete.message,
+          status: 'error',
+          duration: 2000,
+          isClosable: true,
+        });
+      }
+    }
   };
   return (
     <Layout>
@@ -48,10 +87,24 @@ export default function Home() {
               </Text>
               <Text mt={10}>{post.textSnippet}</Text>
             </Box>
-            <Flex direction={'row-reverse'} gap={4} w={'full'}>
-              <EditIcon boxSize={8} color="orange.400" />
-              <DeleteIcon boxSize={8} color="red.400" />
-            </Flex>
+            {!meError && meData && meData?.me?.email === post.user.email && (
+              <Flex direction={'row-reverse'} gap={4} w={'full'}>
+                <Button type="button">
+                  <Link as={NextLink} href={`/post/${post.id}/edit`} passHref>
+                    <EditIcon boxSize={8} color="orange.400" />
+                  </Link>
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={() => {
+                    handleDeletePost(post.id);
+                  }}
+                >
+                  <DeleteIcon boxSize={8} color="red.400" />
+                </Button>
+              </Flex>
+            )}
           </Flex>
         ))}
         {data?.posts.hasMore && (

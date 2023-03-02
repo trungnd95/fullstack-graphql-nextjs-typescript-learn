@@ -37,3 +37,28 @@ mutation createPost($createPostInput: PostCreateInput!) {
     }
   }
 }
+
+mutation updatePost($postUpdateInput: PostCreateInput!, $updateId: ID!) {
+  update(postUpdateInput: $postUpdateInput, id: $updateId) {
+    code
+    message
+    success
+    post {
+      ...postFields
+      user {
+        ...userFields
+      }
+    }
+  }
+}
+
+mutation deletePost($deleteId: ID!) {
+  delete(id: $deleteId) {
+    code
+    message
+    post {
+      ...postFields
+    }
+    success
+  }
+}
