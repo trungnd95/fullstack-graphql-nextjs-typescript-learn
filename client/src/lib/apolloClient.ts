@@ -34,9 +34,9 @@ function createApolloClient() {
         Query: {
           fields: {
             posts: {
-              keyArgs: false, // Don't cache separate results based on
-              // any of this field's arguments.
+              keyArgs: false, // Don't cache separate results based on any of this field's arguments.
               merge(existing, incoming) {
+                //   console.log('Run over cache', existing, incoming);
                 if (existing)
                   return {
                     ...incoming,

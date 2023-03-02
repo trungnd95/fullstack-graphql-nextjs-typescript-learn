@@ -174,6 +174,7 @@ export class PostResolver {
         code: 201,
         success: true,
         message: 'Post is deleted successfully',
+        post: existPost,
       };
     } catch (error) {
       console.log('Error when updating post', error);

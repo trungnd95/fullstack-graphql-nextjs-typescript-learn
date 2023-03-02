@@ -1,14 +1,6 @@
 import { Layout } from '@/components/Layout';
-import {
-  PaginatedPostsDocument,
-  PaginatedPostsQuery,
-  PostDocument,
-  PostQuery,
-  usePostQuery,
-} from '@/graphql-client/generated/graphql';
-import { addApolloState, initializeApollo } from '@/lib/apolloClient';
+import { usePostQuery } from '@/graphql-client/generated/graphql';
 import { Alert, AlertIcon, AlertTitle, Flex, Heading, Spinner, Text } from '@chakra-ui/react';
-import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 
 function SinglePost() {
@@ -48,37 +40,37 @@ function SinglePost() {
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const apolloClient = initializeApollo();
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const apolloClient = initializeApollo();
 
-  const { data } = await apolloClient.query<PaginatedPostsQuery>({
-    query: PaginatedPostsDocument,
-    variables: {
-      limit: 3,
-    },
-  });
+//   const { data } = await apolloClient.query<PaginatedPostsQuery>({
+//     query: PaginatedPostsDocument,
+//     variables: {
+//       limit: 3,
+//     },
+//   });
 
-  return {
-    paths: data.posts.paginatedPosts!.map((post) => ({
-      params: {
-        id: post.id,
-      },
-    })),
-    fallback: 'blocking',
-  };
-};
+//   return {
+//     paths: data.posts.paginatedPosts!.map((post) => ({
+//       params: {
+//         id: post.id,
+//       },
+//     })),
+//     fallback: 'blocking',
+//   };
+// };
 
-export const getStaticProps: GetStaticProps<{ [key: string]: any }, { id: string }> = async ({
-  params,
-}) => {
-  const apolloClient = initializeApollo();
-  await apolloClient.query<PostQuery>({
-    query: PostDocument,
-    variables: {
-      id: `${params?.id}`,
-    },
-  });
-  return addApolloState(apolloClient, { props: {} });
-};
+// export const getStaticProps: GetStaticProps<{ [key: string]: any }, { id: string }> = async ({
+//   params,
+// }) => {
+//   const apolloClient = initializeApollo();
+//   await apolloClient.query<PostQuery>({
+//     query: PostDocument,
+//     variables: {
+//       id: `${params?.id}`,
+//     },
+//   });
+//   return addApolloState(apolloClient, { props: {} });
+// };
 
 export default SinglePost;

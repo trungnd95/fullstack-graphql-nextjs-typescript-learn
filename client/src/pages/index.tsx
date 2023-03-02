@@ -1,13 +1,12 @@
 import { Layout } from '@/components/Layout';
 import {
-  PaginatedPostsDocument,
+  PaginatedPost,
   Post,
   useDeletePostMutation,
   useMeQuery,
   usePaginatedPostsQuery,
 } from '@/graphql-client/generated/graphql';
-import { addApolloState, initializeApollo } from '@/lib/apolloClient';
-import { NetworkStatus } from '@apollo/client';
+import { NetworkStatus, Reference } from '@apollo/client';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Box, Button, Flex, Heading, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import NextLink from 'next/link';
@@ -29,6 +28,7 @@ export default function Home() {
     notifyOnNetworkStatusChange: true,
   });
   const [deletePost] = useDeletePostMutation();
+  console.log('post loading: ', _loading, networkStatus);
 
   const isLoadingMore = networkStatus === NetworkStatus.fetchMore;
 
@@ -44,6 +44,28 @@ export default function Home() {
     const response = await deletePost({
       variables: {
         deleteId: postId,
+      },
+      update: (cache, { data }) => {
+        cache.modify({
+          fields: {
+            posts(
+              existing: Pick<PaginatedPost, 'cursor' | 'hasMore' | 'totalCount'> & {
+                paginatedPosts: Reference[];
+              },
+            ) {
+              if (data?.delete.success) {
+                return {
+                  ...existing,
+                  totalCount: existing.totalCount - 1,
+                  paginatedPosts: existing.paginatedPosts.filter(
+                    (post) => post.__ref != cache.identify(data.delete.post!),
+                  ),
+                };
+              }
+              return existing;
+            },
+          },
+        });
       },
     });
 
@@ -67,6 +89,7 @@ export default function Home() {
       }
     }
   };
+
   return (
     <Layout>
       {/* {loading && !isLoadingMore ? (
@@ -120,18 +143,18 @@ export default function Home() {
   );
 }
 
-export async function getStaticProps() {
-  const apolloClient = initializeApollo();
+// export async function getStaticProps() {
+//   const apolloClient = initializeApollo();
 
-  await apolloClient.query({
-    query: PaginatedPostsDocument,
-    variables: {
-      limit,
-    },
-  });
+//   await apolloClient.query({
+//     query: PaginatedPostsDocument,
+//     variables: {
+//       limit,
+//     },
+//   });
 
-  return addApolloState(apolloClient, {
-    props: {},
-    //revalidate: 1,
-  });
-}
+//   return addApolloState(apolloClient, {
+//     props: {},
+//     //revalidate: 1,
+//   });
+// }

@@ -47,6 +47,7 @@ export const CreatePost: React.FC<{}> = () => {
                     if (data?.create.success && data.create.post) {
                       return {
                         ...existing,
+                        totalCount: existing.totalCount + 1,
                         paginatedPosts: [
                           { __ref: cache.identify(data.create.post) },
                           ...existing.paginatedPosts,
